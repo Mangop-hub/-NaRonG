@@ -1,5 +1,6 @@
 package com.pu.narongv1;
 
+import android.hardware.Sensor;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -22,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
         Fragment homeFragment = new HomeFragment();
         Fragment ProfileFragment = new profileFragment();
         Fragment SettingFragment = new settingFragment();
+        Fragment sensorFragment = new SensorFragment();
 
         setCurrentFragment(homeFragment);
 
@@ -38,6 +40,10 @@ public class MainActivity extends AppCompatActivity {
             }
             else if (id == R.id.settings){
                 setCurrentFragment(SettingFragment);
+                return true;
+            }
+            else if (id == R.id.sensor){
+                setCurrentFragment(sensorFragment);
                 return true;
             }
 
