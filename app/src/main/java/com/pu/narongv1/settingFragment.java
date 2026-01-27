@@ -12,10 +12,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 
@@ -55,6 +62,28 @@ public class settingFragment extends Fragment {
         button = (Button) view.findViewById(R.id.button);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
         mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        if (ActivityCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new
+                            String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION},
+                    locationRequestCode);
+        }
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(callbackactive);
+        }
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mapFragment != null) {
+                    mapFragment.getMapAsync(callbackactive);
+                }
+                Toast.makeText(getActivity(), "Get Your Location",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
         return view;
     }
     private void Get_Current_location() {
@@ -76,4 +105,31 @@ public class settingFragment extends Fragment {
                     }
                 });
     }
+    private OnMapReadyCallback callbackactive = new OnMapReadyCallback() {
+        @Override
+        public void onMapReady(GoogleMap googleMap) {
+            Get_Current_location();
+            googleMap.clear();
+            String strtitle = "pure Location";
+            String strsnippet = "I am Here at " + clat[0] + ", " + clng[0];
+            LatLng cposition = new LatLng(clat[0], clng[0]);
+            MarkerOptions options = new MarkerOptions()
+                    .position(cposition)
+                    .title(strtitle)
+                    .snippet(strsnippet)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+
+            LatLng cposition2 = new LatLng(35.683575632775074, 139.75819730549824);
+            MarkerOptions options2 = new MarkerOptions()
+                    .position(cposition2)
+                    .title("Maker")
+                    .snippet("Home")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+
+            googleMap.addMarker(options);
+            googleMap.addMarker(options2);
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(cposition, 12));
+        }
+    };
+
 }
