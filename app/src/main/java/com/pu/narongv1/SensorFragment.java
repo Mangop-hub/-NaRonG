@@ -7,6 +7,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 
+
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -15,20 +16,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 
+
 public class SensorFragment extends Fragment {
 
     private SensorManager sensorManager;
-    private Sensor acceleromemter, gyroscope, proximity;
-    private TextView textView2, textView3, textView4;
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-
-    private String mParam1;
-    private String mParam2;
+    private Sensor acceleromemter, gyroscope, proximity, pressure,  temperature;
+    private TextView textView2,textView3,textView4,textView5,textView6;
 
     public SensorFragment() {
-        // Required empty public constructor
+
     }
 
     @Override
@@ -44,11 +40,16 @@ public class SensorFragment extends Fragment {
         textView2 = (TextView) view.findViewById(R.id.textView2);
         textView3 = (TextView) view.findViewById(R.id.textView3);
         textView4 = (TextView) view.findViewById(R.id.textView4);
+        textView5 = (TextView) view.findViewById(R.id.textView5);
+        textView6 = (TextView) view.findViewById(R.id.textView6);
 
         sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         acceleromemter = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         proximity = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        pressure = sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
+
+        temperature = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
 
         SensorEventListener acceleromemterSensorListener = new SensorEventListener() {
             @Override
@@ -89,16 +90,73 @@ public class SensorFragment extends Fragment {
                     textView4.setText(stracceler);
                 }
             }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int i) {
+            }
+        };
+        SensorEventListener pressureSensorListener = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent sensorEvent) {
+                Sensor mySensor = sensorEvent.sensor;
+
+                if (mySensor.getType() == Sensor.TYPE_PRESSURE) {
+                    String str = "" + sensorEvent.values[0] + " hPa";
+                    textView5.setText(str);
+                }
+            }
+
             @Override
             public void onAccuracyChanged(Sensor sensor, int i) {
             }
         };
 
+        SensorEventListener temperatureSensorListener = new SensorEventListener() {
+
+            @Override
+            public void onSensorChanged(SensorEvent event) {
+
+                if (event.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) {
+
+                    float temp = event.values[0]; // °C
+                    String str = temp + " °C";
+                    textView6.setText(str);
+                }
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            }
+        };
+
+
+
+
+        sensorManager.registerListener(pressureSensorListener, pressure,
+                SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(acceleromemterSensorListener, acceleromemter ,
                 SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(gyroscopeSensorListener, gyroscope ,
                 SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(proximitySensorListener, proximity , 2 * 1000 * 1000);
+
+        // ===== Temperature Sensor =====
+        if (temperature != null) {
+
+            sensorManager.registerListener(
+                    temperatureSensorListener,
+                    temperature,
+                    SensorManager.SENSOR_DELAY_NORMAL
+            );
+
+        } else {
+            textView6.setText("No Temperature Sensor");
+        }
+
+
+        {
+            textView6.setText("No Light Sensor");
+        }
 
         return view;
     }
